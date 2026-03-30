@@ -15,7 +15,7 @@ services:
     volumes:
       - mysql_replica_data:/var/lib/mysql
       - ./mysql-replica/my.cnf:/etc/mysql/conf.d/replica.cnf:ro
-    command: --server-id=2 --read-only=ON --log-bin=mysql-bin --relay-log=relay-bin
+    command: --server-id=2 --log-bin=mysql-bin --relay-log=relay-bin
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
