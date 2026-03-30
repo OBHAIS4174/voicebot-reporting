@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  mysql-replica:
+    image: mysql:8.0
+    container_name: voicebot_reporting_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysql_replica_data:/var/lib/mysql
+      - ./mysql-replica/my.cnf:/etc/mysql/conf.d/replica.cnf:ro
+    command: --server-id=2 --read-only=ON --log-bin=mysql-bin --relay-log=relay-bin
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_replica_data:
