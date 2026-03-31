@@ -1,26 +1,19 @@
 version: '3.8'
 
-services:
-  mysql-replica:
-    image: mysql:8.0
-    container_name: voicebot_reporting_db
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "${MYSQL_PORT:-3307}:3306"
-    volumes:
-      - mysql_replica_data:/var/lib/mysql
-      - ./mysql-replica/my.cnf:/etc/mysql/conf.d/replica.cnf:ro
-    command: --server-id=2 --log-bin=mysql-bin --relay-log=relay-bin
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+# Replica MySQL runs on the HOST (not in Docker) on the reporting server (172.16.0.242).
+# See replica-init/ for setup scripts.
+#
+# Optional: start Adminer for read-only query access:
+#   docker compose --profile tools up -d
 
-volumes:
-  mysql_replica_data:
+services:
+  adminer:
+    image: adminer
+    container_name: voicebot_reporting_adminer
+    profiles:
+      - tools
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8070:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: 172.17.0.1   # host MySQL replica via Docker bridge
